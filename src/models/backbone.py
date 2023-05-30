@@ -49,7 +49,7 @@ class VGG:
         for idx, module in self.vgg_features._modules.items():
             x = module(x)
 
-            if self.reference[str(idx)] in list(self.layers):
+            if str(idx) in self.reference.keys() and self.reference[str(idx)] in list(self.layers):
                 features[self.reference[str(idx)]] = x
 
         return features
