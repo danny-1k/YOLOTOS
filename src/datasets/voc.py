@@ -36,10 +36,9 @@ def label_from_voc(vocab, annotations, width, height):
 
     classes = vocab.encode(classes)
     coords = [
-        [1, 1, 1, 1],
         *coords,
         [0, 0, 0, 0]
-    ]  # SOS should be [1, 1, 1, 1] and EOS is [0, 0, 0, 0]
+    ]  #EOS is [0, 0, 0, 0]
 
     # it doesn't matter much what EOS is for the regression case
     # as when the model is done is dependent on the classification outputs
