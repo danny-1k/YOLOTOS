@@ -53,6 +53,26 @@ class VGG:
                 features[self.reference[str(idx)]] = x
 
         return features
+    
+
+    @classmethod
+    def _has_layer(cls, version, layer):
+        """Checks if a layer name (e.g conv1_1) is valid for the specified VGG version
+
+        Args:
+            version (str): `vgg16` or `vgg19`
+            layer (str): conv1_1, etc
+        """
+
+        if "16" in str(version.lower()) and layer.lower() in list(vgg_16_layers.values()):
+            return True
+        
+        if "19" in str(version.lower()) and layer.lower() in list(vgg_19_layers.values()):
+            return True
+
+        return False
+
+
 
 
 class CNNBackbone(nn.Module):
