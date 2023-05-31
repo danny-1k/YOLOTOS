@@ -77,7 +77,7 @@ def write_to_tb(writer: SummaryWriter, global_index: int, net: nn.Module, scalar
 
     # parameters & gradients
 
-    for name, parameter in net.decoder.named_parameters():
+    for name, parameter in net.named_parameters():
         if parameter.requires_grad and not isinstance(parameter.grad, type(None)):
             writer.add_histogram(name, parameter, global_index)
             writer.add_histogram(f"{name}.grad", parameter.grad, global_index)

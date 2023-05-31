@@ -18,7 +18,7 @@ def denormalize(image):
 
 
 def get_hostname_and_time_string():
-    current_time = datetime.now().strftime("%Y%m%d_%H:%M:%S_%f")
+    current_time = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
     hostname = socket.gethostname()
     string = f"{current_time}_{hostname}"
     return string
