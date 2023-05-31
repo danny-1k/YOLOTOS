@@ -5,14 +5,15 @@ import sys
 sys.path.append("..")
 from utils.box_ops import box_cxcywh_to_xyxy, generalized_box_iou
 
-class OrderInvariantLoss(nn.Module):
-    def __init__(self, num_tokens, matcher, bb_weight=1, class_weight=1, giou_weight=1):
+class CombinedDetectionLoss(nn.Module):
+    def __init__(self, num_tokens, matcher, bb_weight=1, class_weight=1, giou_weight=1, use_matcher=False):
         super().__init__()
         self.num_tokens = num_tokens
         self.matcher = matcher
         self.bb_weight = bb_weight
         self.class_weight = class_weight
         self.giou_weight = giou_weight
+        self.use_matcher = use_matcher
 
         self.bb_loss = nn.L1Loss()
         self.class_loss = nn.CrossEntropyLoss()
@@ -43,36 +44,38 @@ class OrderInvariantLoss(nn.Module):
         #   classes: Tensor (N, S)
         # }
 
-        matched_indices = self.matcher(predictions, targets)
+        if self.use_matcher:
+            matched_indices = self.matcher(predictions, targets)
 
-        sorted_predictions_indices = matched_indices["predictions"]
-        sorted_targets_indices = matched_indices["targets"]
+            sorted_predictions_indices = matched_indices["predictions"]
+            sorted_targets_indices = matched_indices["targets"]
 
         predicted_boxes = predictions["bbs"]
+        predicted_classes = predictions["classes"]
+        target_boxes = targets["bbs"]
+        target_classes = targets["classes"]
         
         bs = predicted_boxes.shape[0]
         num_predictions = predicted_boxes.shape[1]
 
 
-        # select optimal order of boxes
+        if self.use_matcher:
+            # select optimal order of boxes
 
-        predicted_boxes = predicted_boxes.view(bs*num_predictions, -1)[sorted_predictions_indices.view(bs*num_predictions)]
-        predicted_boxes = predicted_boxes.view(bs, num_predictions, -1)
+            predicted_boxes = predicted_boxes.view(bs*num_predictions, -1)[sorted_predictions_indices.view(bs*num_predictions)]
+            predicted_boxes = predicted_boxes.view(bs, num_predictions, -1)
 
-        # select optimal order of classes 
-        predicted_classes = predictions["classes"]
-        predicted_classes = predicted_classes.view(bs*num_predictions, -1)[sorted_predictions_indices]
-        predicted_classes = predicted_classes.view(bs, num_predictions, -1)
+            # select optimal order of classes 
+            predicted_classes = predicted_classes.view(bs*num_predictions, -1)[sorted_predictions_indices]
+            predicted_classes = predicted_classes.view(bs, num_predictions, -1)
 
-        # select optimal order of targets
+            # select optimal order of targets
 
-        target_boxes = targets["bbs"]
-        target_boxes = target_boxes.view(bs*num_predictions, -1)[sorted_targets_indices]
-        target_boxes = target_boxes.view(bs, num_predictions, -1)
+            target_boxes = target_boxes.view(bs*num_predictions, -1)[sorted_targets_indices]
+            target_boxes = target_boxes.view(bs, num_predictions, -1)
 
-        target_classes = targets["classes"]
-        target_classes = target_classes.view(-1)[sorted_targets_indices]
-        target_classes = target_classes.view(bs, num_predictions)
+            target_classes = target_classes.view(-1)[sorted_targets_indices]
+            target_classes = target_classes.view(bs, num_predictions)
 
 
 
@@ -111,7 +114,7 @@ if __name__ == "__main__":
 
     matcher = HungarianMatcher2()
 
-    lossfn = OrderInvariantLoss(num_tokens=5, matcher=matcher)
+    lossfn = CombinedDetectionLoss(num_tokens=5, matcher=matcher)
 
     loss = lossfn(predictions, targets)
 
