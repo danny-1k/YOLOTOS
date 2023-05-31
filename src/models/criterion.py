@@ -83,10 +83,15 @@ class OrderInvariantLoss(nn.Module):
             box_cxcywh_to_xyxy(target_boxes.view(bs*num_predictions, -1)))
         )
 
+        giou_loss = giou_loss.mean()
 
-        loss = self.bb_weight*bb_losss + self.class_weight*class_loss + self.giou_weight*giou_loss.mean()
+        loss = self.bb_weight*bb_losss + self.class_weight*class_loss + self.giou_weight*giou_loss
 
-        return loss
+        return loss, {
+            "bb_loss": bb_losss.item(),
+            "giou_loss": giou_loss.item(),
+            "class_loss": class_loss.item(),
+        }
 
 
 if __name__ == "__main__":
