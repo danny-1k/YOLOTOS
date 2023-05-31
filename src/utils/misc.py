@@ -1,3 +1,5 @@
+import socket
+from datetime import datetime
 import torch
 
 def denormalize(image):
@@ -13,3 +15,10 @@ def denormalize(image):
     image = (image*std) + mean
 
     return image
+
+
+def get_hostname_and_time_string():
+    current_time = datetime.now().strftime("%Y%m%d_%H:%M:%S_%f")
+    hostname = socket.gethostname()
+    string = f"{current_time}_{hostname}"
+    return string
