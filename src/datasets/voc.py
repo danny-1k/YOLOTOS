@@ -78,7 +78,6 @@ class PascalVocDataset(Dataset):
             vocab=self.vocab,
             annotations=annotations,
             width=w, height=h,
-            shuffle=False
         )
 
         return image, torch.Tensor(classes), torch.Tensor(coords), length
