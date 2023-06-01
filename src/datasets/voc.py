@@ -59,7 +59,7 @@ class PascalVocDataset(Dataset):
         self.dataset = VOCDetection(
             root=root, year=year,
             image_set=image_set,
-            transform=self.transform,
+            transform=None,
             download=download
 
         )
@@ -80,7 +80,12 @@ class PascalVocDataset(Dataset):
             width=w, height=h,
         )
 
-        return image, torch.Tensor(classes), torch.Tensor(coords), length
+        classes = torch.Tensor(classes)
+        coords = torch.Tensor(coords)
+
+        image, coords = self.transform(image, coords)
+
+        return image, classes, coords, length
 
     def __len__(self):
         return len(self.dataset)
