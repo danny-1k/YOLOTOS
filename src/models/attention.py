@@ -33,3 +33,34 @@ class LuongAttention(nn.Module):
         concat = self.tanh(self.C(concat))  # (N, T)
 
         return concat, scores
+    
+
+
+class GeneralAttention(nn.Module):
+    def __init__(self, hidden_size):
+        super().__init__()
+
+        self.hidden_size = hidden_size
+
+        self.attention = nn.MultiheadAttention(
+            embed_dim=hidden_size,
+            num_heads=1,
+            dropout=0,
+            batch_first=True,
+        )
+
+
+    def forward(self, hidden_state, encoder_outputs):
+        # hidden_state of shape (N, 1, hidden_size)
+        # encoder_outputs of shape (N, S, hidden_size)
+
+        # k=v=encoder_outputs
+        # q = hidden_state
+
+        context, weights = self.attention(
+            query=hidden_state,
+            key=encoder_outputs,
+            value=encoder_outputs
+        )
+
+        return context, weights
