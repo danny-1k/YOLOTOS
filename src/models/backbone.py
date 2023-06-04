@@ -53,7 +53,9 @@ class VGG:
                 features[self.reference[str(idx)]] = x
 
         return features
-    
+
+    def to(self, device):
+        self.vgg_features.to(device)  
 
     @classmethod
     def _has_layer(cls, version, layer):
