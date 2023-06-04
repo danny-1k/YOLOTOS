@@ -9,3 +9,4 @@
 logs
 data
 checkpoints/
+*.out
