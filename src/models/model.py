@@ -49,7 +49,7 @@ class YOLOTOS(nn.Module):
 
         self.classification_features_project = nn.Conv2d(
             in_channels=self.classification_features_layer["channels"],
-            out_channels=128,
+            out_channels=S,
             kernel_size=1
         )
 
