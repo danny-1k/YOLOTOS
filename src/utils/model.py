@@ -10,7 +10,7 @@ def clean_prediction(classes, bbs):
     """
 
     N = classes.shape[0]
-    indices = torch.arange(N)
+    indices = torch.arange(N).to(bbs.device)
     # indices 0, 1  correspond to <s>, </s> and </p> respectively
     mask = (classes != 0) & (classes != 1)
 

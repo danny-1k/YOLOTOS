@@ -25,6 +25,7 @@ def train_one_epoch(net, criterion, data, optimizer, device, iteration, writer, 
     average_loss = 0
     average_bb_loss = 0
     average_giou_loss = 0
+    average_class_loss = 0
 
 
     for image, target_classes,  target_bbs, lengths in tqdm(data):
@@ -82,9 +83,9 @@ def train_one_epoch(net, criterion, data, optimizer, device, iteration, writer, 
         iteration += 1
 
         average_loss = .6*average_loss + .4*loss.item()
-        average_bb_loss = .6*average_bb_loss + .4*loss_dict["bb_loss"].item()
-        average_giou_loss = .6*average_giou_loss + .4*loss_dict["giou_loss"].item()
-        average_class_loss = .6*average_class_loss + .4*loss_dict["class_loss"].item()
+        average_bb_loss = .6*average_bb_loss + .4*loss_dict["bb_loss"]
+        average_giou_loss = .6*average_giou_loss + .4*loss_dict["giou_loss"]
+        average_class_loss = .6*average_class_loss + .4*loss_dict["class_loss"]
 
 
     write_to_tb(
@@ -93,10 +94,10 @@ def train_one_epoch(net, criterion, data, optimizer, device, iteration, writer, 
         net=net,
         scalars={
             "Loss/train": {
-                "combined": average_loss.item(),
-                "bb": loss_dict["bb_loss"],
-                "giou": loss_dict["giou_loss"],
-                "class": loss_dict["class_loss"]
+                "combined": average_loss,
+                "bb": average_bb_loss,
+                "giou": average_giou_loss,
+                "class": average_class_loss
             }
         },
         images_with_bbs={
@@ -137,6 +138,8 @@ def eval_model(net, criterion, data, device, iteration, writer):
     average_loss = 0
     average_bb_loss = 0
     average_giou_loss = 0
+    average_class_loss = 0
+
 
     for image, target_classes,  target_bbs, lengths in tqdm(data):
         image = image.to(device)
@@ -163,6 +166,7 @@ def eval_model(net, criterion, data, device, iteration, writer):
         average_loss = .6*average_loss + .4*loss.item()
         average_bb_loss = .6*average_bb_loss + .4*loss_dict["bb_loss"]
         average_giou_loss = .6*average_giou_loss + .4*loss_dict["giou_loss"]
+        average_class_loss = .6*average_class_loss + .4*loss_dict["class_loss"]
 
 
     write_to_tb(
@@ -174,7 +178,7 @@ def eval_model(net, criterion, data, device, iteration, writer):
                 "combined": average_loss,
                 "bb": average_bb_loss,
                 "giou": average_giou_loss,
-                "class": loss_dict["class_loss"]
+                "class": average_class_loss
             }
         },
     )
@@ -193,6 +197,8 @@ def run(args):
     device = args.device
 
     net, criterion = build_model(args)
+
+    net.backbone.to(device)
 
     net.to(device)
     criterion.to(device)

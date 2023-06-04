@@ -110,11 +110,11 @@ class YOLOTOS(nn.Module):
 
         decoder_hidden = None
 
-        predicted_bbs = torch.zeros(batch_size, length, 4)
-        predicted_classes = torch.zeros(batch_size, length, self.n_tokens)
+        predicted_bbs = torch.zeros(batch_size, length, 4).to(classification_features.device)
+        predicted_classes = torch.zeros(batch_size, length, self.n_tokens).to(classification_features.device)
 
         if return_scores:
-            attention_scores = torch.zeros(batch_size, length, encoder_outputs.shape[1])
+            attention_scores = torch.zeros(batch_size, length, encoder_outputs.shape[1]).to(classification_features.device)
 
         for t in range(length):
             if t == 0:
