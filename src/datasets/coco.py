@@ -1,6 +1,6 @@
 import torch
 from torch.utils.data import Dataset
-# from .transforms import detection_transforms
+from .transforms import detection_transforms
 from torchvision.datasets.coco import CocoDetection
 import matplotlib.pyplot as plt
 import json
@@ -50,6 +50,8 @@ class CocoDataset(Dataset):
             root=f"../data/coco/{split}2017",
             annFile=f"../data/coco/annotations/instances_{split if split == 'train' else 'val'}2017.json",
         )
+        self.transform = detection_transforms["train" if split=="train" else "test"]
+
 
     def __getitem__(self, index):
         image, annotations = self.dataset[index]
@@ -62,6 +64,11 @@ class CocoDataset(Dataset):
             width=width, height=height,
             labels=self.labels
         )
+
+        classes = torch.Tensor(classes)
+        coords = torch.Tensor(coords)
+
+        image, coords = self.transform(image, coords)
 
         return image, classes, coords, length
 
