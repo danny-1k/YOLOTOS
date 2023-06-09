@@ -16,4 +16,4 @@ def build_dataset(image_set, dataset, args):
         vocab = Vocab(classes=json.load(open(f"datasets/classes/coco.json", "r")).keys())
         dataset = coco.CocoDataset(vocab=vocab, split=image_set)
 
-        return dataste, vocab
+        return dataset, vocab
