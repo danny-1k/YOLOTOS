@@ -65,6 +65,9 @@ class CocoDataset(Dataset):
 
         return image, classes, coords, length
 
+    def __len__(self):
+        return len(self.dataset)
+
 
 if __name__ == "__main__":
     import json
