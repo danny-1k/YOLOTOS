@@ -187,12 +187,25 @@ def eval_model(net, criterion, data, device, iteration, writer):
 
 
 def run(args):
+    has_checkpoint = False
+
+    if args.from_checkpoint:
+        checkpoint = torch.load(args.from_checkpoint)
+        state_dict = checkpoint["net"]
+        args = checkpoint["args"]
+        has_checkpoint = True
+
+        print("Loaded from checkpoint")
+        
+
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
     random.seed(args.seed)
 
     if args.dataset == "voc":
         args.num_classes = 20
+    else:
+        args.num_classes = 91
 
     device = args.device
 
@@ -203,8 +216,11 @@ def run(args):
     net.to(device)
     criterion.to(device)
 
+    if has_checkpoint:
+        net.load_state_dict(state_dict)
+
     optimizer = optim.Adam(net.parameters(), lr=args.lr, weight_decay=args.weight_decay)
-    lr_scheduler = optim.lr_scheduler.StepLR(optimizer, args.lr_drop)
+    lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=32000, eta_min=0)#optim.lr_scheduler.StepLR(optimizer, args.lr_drop)
 
     # create necessary folders
 
@@ -238,7 +254,7 @@ def run(args):
     if not args.no_eval:
 
         test, _ = build_dataset(
-            image_set="val",
+            image_set="test",
             dataset=args.dataset,
             args=args
         )
@@ -273,15 +289,17 @@ def run(args):
         lr_scheduler.step()
 
 
-        for checkpoint_path in [f"{args.checkpoint_dir}/{args.run_name}/checkpoint.pth", f"{args.checkpoint_dir}/{args.run_name}/checkpoint{epoch: 04}.pth"]:
-            torch.save({
+        torch.save(
+            {
                 "net": net.state_dict(),
                 "optimizer": optimizer.state_dict(),
                 "lr_scheduler": lr_scheduler.state_dict(),
                 "epoch": epoch,
                 "args": args,
                 "loss": average_train_loss,
-            }, checkpoint_path)
+            },
+            f"{args.checkpoint_dir}/{args.run_name}/checkpoint.pth"
+        )
 
 
         if not args.no_eval:
@@ -339,7 +357,7 @@ if __name__ == "__main__":
     parser.add_argument('--giou_loss_coef', default=2, type=float)
 
     # Misc
-    parser.add_argument('--dataset', default='voc', type=str)
+    parser.add_argument('--dataset', default='coco', type=str)
     parser.add_argument('--voc_year', default='2007', type=str)
     parser.add_argument("--data_root", default="../data/voc", type=str)
     parser.add_argument("--download_dataset", action="store_true")
@@ -362,6 +380,8 @@ if __name__ == "__main__":
     parser.add_argument("--use_matcher", action="store_true")
 
     parser.add_argument("--no_eval", action="store_true")
+
+    parser.add_argument("--from_checkpoint", default=None)
 
     args = parser.parse_args()
 
