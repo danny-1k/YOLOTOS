@@ -1,5 +1,6 @@
 import json
 from . import voc
+from . import coco
 from .vocab import Vocab
 
 
@@ -10,3 +11,9 @@ def build_dataset(image_set, dataset, args):
                                        image_set=image_set, year=args.voc_year, shuffle=True)
 
         return dataset, vocab
+
+    if dataset == "coco":
+        vocab = Vocab(classes=json.load(open(f"datasets/classes/coco.json", "r")).keys())
+        dataset = coco.CocoDataset(vocab=vocab, split=image_set)
+
+        return dataste, vocab
