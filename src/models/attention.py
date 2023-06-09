@@ -37,15 +37,16 @@ class LuongAttention(nn.Module):
 
 
 class GeneralAttention(nn.Module):
-    def __init__(self, hidden_size):
+    def __init__(self, hidden_size, dropout):
         super().__init__()
 
         self.hidden_size = hidden_size
+        self.dropout = dropout
 
         self.attention = nn.MultiheadAttention(
             embed_dim=hidden_size,
             num_heads=1,
-            dropout=0,
+            dropout=dropout,
             batch_first=True,
         )
 
