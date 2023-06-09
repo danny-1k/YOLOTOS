@@ -63,7 +63,7 @@ class CocoDataset(Dataset):
             labels=self.labels
         )
 
-        return image, classes, coords, areas, length
+        return image, classes, coords, length
 
 
 if __name__ == "__main__":
